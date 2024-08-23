@@ -7,16 +7,16 @@ import cv2
 import numpy as np
 
 st.set_page_config(
-    page_title="Sistem Deteksi dan Hitung Jumlah Orang Menggunakan YOLOv8",
+    page_title="Sistem Prediksi Jumlah Orang Menggunakan YOLOv8",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-st.title("Sistem Deteksi dan Hitung Jumlah Orang Menggunakan YOLOv8")
+st.title("Sistem Crowd Counting Berbasis Web Menggunakan YOLOv8")
 
 st.markdown("""
-    Sistem ini digunakan untuk mendeteksi dan menghitung jumlah orang di area pintu stasiun Bekasi.
+    Sistem ini digunakan untuk  memprediksi jumlah orang di area pintu stasiun Bekasi.
     """)
 
 model_path = Path('models/best.pt')
@@ -45,11 +45,11 @@ if source_radio == 'Gambar':
         source_imgs.extend(uploaded_images)
 
 if source_imgs and model:
-    detect_button = st.sidebar.button("Mulai Deteksi dan Hitung Objek")
+    detect_button = st.sidebar.button("Mulai Prediksi...")
 
     if detect_button:
         for i, source_img in enumerate(source_imgs, start=1):
-            st.markdown(f"## Hasil Deteksi dan Hitung Gambar {i}")
+            st.markdown(f"## Hasil Prediksi Gambar {i}")
             col1, col2 = st.columns(2)
 
             with col1:
@@ -75,7 +75,6 @@ if source_imgs and model:
                     boxes = results[0].boxes
                     num_people = len(boxes)  
 
-                    
                     for idx, box in enumerate(boxes):
                         x1, y1, x2, y2 = map(int, box.xyxy[0])
                         conf = box.conf.item() * 100
@@ -84,10 +83,10 @@ if source_imgs and model:
                         text = f'ID: {idx+1}'
                         cv2.putText(res_plotted, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
 
-                    text_people_count = f'Jumlah Orang: {num_people}'
+                    text_people_count = f'Prediksi Jumlah Orang: {num_people}'
                     cv2.putText(res_plotted, text_people_count, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    st.image(res_plotted, caption='Gambar Deteksi', use_column_width=True)
+                    st.image(res_plotted, caption='Gambar Hasil Prediksi', use_column_width=True)
 
                     _, buffer = cv2.imencode('.jpg', cv2.cvtColor(res_plotted, cv2.COLOR_RGB2BGR))
                     result_img_bytes = buffer.tobytes()
@@ -97,9 +96,9 @@ if source_imgs and model:
                     st.error(ex)
 
             with st.container():
-                with st.expander(f"Hasil Deteksi Gambar {i}", expanded=True):
-                    st.write(f"Jumlah Orang Terdeteksi: {num_people}")
-                    st.write(f"Rincian Deteksi:")
+                with st.expander(f"Hasil Prediksi Gambar {i}", expanded=True):
+                    st.write(f"Prediksi Jumlah Orang: {num_people}")
+                    st.write(f"Rincian Prediksi:")
                     data = []
                     for idx, box in enumerate(boxes, start=1):
                         obj_conf = box.conf.item() * 100
@@ -112,8 +111,8 @@ if source_imgs and model:
                         st.dataframe(df)
 
                     st.download_button(
-                        label="Unduh Gambar Hasil Deteksi",
+                        label="Unduh Gambar Hasil Prediksi",
                         data=result_img_bytes,
-                        file_name=f"detected_image_{i}.jpg",
+                        file_name=f"predicted_image_{i}.jpg",
                         mime="image/jpeg"
                     )
